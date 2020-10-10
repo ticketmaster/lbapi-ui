@@ -1,0 +1,29 @@
+<div matDialogTitle>Deleting {{this.source.data.name}}</div>
+<div matDialogContent>
+  <div style="margin-bottom: 16px;">
+    Are you sure you want to delete this resource?
+  </div>
+  <mat-form-field>
+    <mat-label>IP</mat-label>
+    <input matInput readonly value="{{this.source.data.ip}}" />
+  </mat-form-field>
+</div>
+<div matDialogActions style="display: flex;">
+  <button
+    style="flex-grow: auto;"
+    mat-flat-button
+    matDialogClose
+    (click)="close()"
+  >
+    Cancel
+  </button>
+  <span style="flex-grow: 1;"></span>
+  <button
+    style="flex-grow: auto;"
+    mat-flat-button
+    (click)="commit()"
+    cdkFocusInitial
+  >
+    Commit
+  </button>
+</div>

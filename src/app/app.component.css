@@ -1,0 +1,26 @@
+.statusBar {
+  background-color: #1f262d;
+  overflow: hidden;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  color: #3396ff;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 8px 16px;
+  height: 32px;
+}
+
+.statusBar > span {
+  align-items: center;
+  display: flex;
+  flex-grow: auto;
+  padding-right:10px;
+}
+
+.statusBar > .mat-spinner {
+  align-items: center;
+  display: flex;
+  flex-grow: auto;
+}

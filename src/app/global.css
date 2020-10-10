@@ -1,0 +1,286 @@
+/*
+.mat-icon {
+  line-height: .77;
+}
+*/
+
+.mat-icon-button ::ng-deep .mat-button-focus-overlay {
+  display: none;
+}
+
+form .mat-icon {
+  color: rgb(97, 115, 124);
+  cursor: pointer;
+}
+
+.help {
+  color: rgb(2, 108, 223) !important;
+}
+
+#nav-row {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+#nav-row .nav-button {
+  font-weight:400;
+}
+
+#nav-row #home-button {
+  font-size: 24px;
+  font-weight: 500;
+  padding-right: 20px;
+}
+
+#nav-row .mat-icon {
+  display: table-cell;
+  padding-right: 10px;
+  vertical-align: middle;
+}
+
+#nav-row a,
+#nav-row span {
+  border-bottom: 1px solid #1f262d;
+  border-radius: 0;
+  box-sizing: border-box;
+  display: table-cell;
+  height: 49px;
+  vertical-align: middle;
+}
+
+.add-row {
+  margin: 14px auto 0;
+  padding: 0 16px;
+  text-align: left;
+}
+
+.avi-label {
+  background-color: #ff4b00;
+  border-radius: 4px;
+  color: #fff;
+  cursor: default;
+  padding: 4px;
+}
+
+.content {
+  padding: 16px;
+}
+
+.content > form {
+  display: flex;
+}
+
+.delete-row {
+  margin: 14px auto 0;
+  padding: 0 10px;
+  text-align: right;
+}
+
+.dialog-title {
+  color: #4191e7;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.flex-radio {
+  padding: 0 20px;
+}
+
+.flex-row {
+  display: flex;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.flex-row .flex-col {
+  flex-grow: 1;
+  text-align: center;
+}
+
+.flex-row .flex-suffix {
+  flex-grow: auto;
+  text-align: right;
+}
+
+.flex-row .icon-suffix {
+  flex-grow: auto;
+  padding-top: 4px;
+  text-align: right;
+}
+
+.flex-row .mat-form-field {
+  flex-grow: 1;
+  margin: 0 10px;
+}
+
+.flex-row .suffix {
+  flex-grow: auto;
+  padding-top: 15px;
+  text-align: right;
+}
+
+.flex-row .toggle-suffix {
+  flex-grow: auto;
+  padding-top: 14px;
+  text-align: right;
+}
+
+.mat-cell > .mat-icon-button,
+.mat-icon-button {
+  color: #61737c;
+}
+
+.mat-dialog-container {
+  background-color: #e3ecf1;
+}
+
+.mat-dialog-content {
+  padding-bottom: 7px;
+}
+
+.mat-dialog-title > .mat-toolbar {
+  background-color: #1f262d;
+}
+
+.mat-expansion-panel {
+  background-color: #f7f7f7;
+}
+
+.mat-expansion-panel .mat-card {
+  margin: 16px;
+}
+
+.mat-expansion-panel .mat-expansion-panel {
+  background-color: #fafafa;
+}
+
+.mat-expansion-panel .mat-expansion-panel .mat-expansion-panel-header-title {
+  color: #026cdf;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.mat-expansion-panel-header-title {
+  color: #696969;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.mat-icon-button[disabled][disabled],
+.mat-icon-button[disabled] {
+  color: #e3e4e5;
+}
+
+.mat-slide-toggle {
+  font-size: small;
+}
+
+.mat-toolbar .mat-slide-toggle {
+  color: #fff;
+  font-size: normal;
+  font-weight:300;
+}
+
+.mat-toolbar.mat-primary {
+  background-color: #1f262d;
+  line-height: 49px;
+  height: 50px;
+  position: relative;
+  z-index: 1000;
+}
+
+.mat-toolbar.mat-secondary {
+  background-color: #026cdf;
+  position: 0;
+  top: 0;
+  z-index: 900;
+  line-height: 50px;
+  height: 50px;
+  position: sticky;
+  position: -webkit-sticky;
+}
+
+.mat-toolbar.mat-secondary .secondary-heading {
+  color: #fff !important;
+  font-weight: 500;
+}
+
+.netscaler-label {
+  background-color: #1879b9;
+  border-radius: 4px;
+  color: #fff;
+  cursor: default;
+  padding: 4px;
+}
+
+.pool-toggle {
+  color: #1f262d;
+}
+
+.port-label {
+  border-radius: 4px;
+  color: #fff;
+  cursor: default;
+  font-weight: 500;
+  margin-left: 10px;
+  margin-right: 2px;
+  padding: 4px;
+}
+
+.search-box {
+  flex-grow: 1;
+}
+
+.search-box .mat-icon {
+  color: #61737c;
+}
+
+.secondary-nav-row .mat-button:active {
+  background-color: #013670;
+}
+
+.secondary-nav-row .mat-button:hover {
+  background-color: #0150a7;
+}
+
+.secondary-nav-row .mat-icon-button,
+.mat-toolbar .mat-icon,
+.mat-warn .mat-icon {
+  color: #fff;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.spinner-container {
+  height: 360px;
+  left: 50%;
+  margin-left: -50px;
+  margin-top: -50px;
+  position: absolute;
+  top: 50%;
+  width: 390px;
+  z-index: 2;
+}
+
+.row-toggle {
+  flex-grow: auto;
+  text-align: center;
+  padding-right: 10px;
+  padding-top: 2px;
+}
+
+.expansion-icon {
+  height: inherit;
+  line-height: inherit;
+  padding-right: 10px;
+  padding-top: 1px;
+  font-size: large;
+}
+
+.active-link {
+  background-color: #0150a7;
+  height: 49px !important;
+  border-bottom: 1px solid #fff !important;
+}

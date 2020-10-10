@@ -1,0 +1,56 @@
+<div matDialogTitle>Deleting {{this.source.load_balancer_ip}}</div>
+<div matDialogContent>
+  <div style="margin-bottom: 16px;">
+    Are you sure you want to delete this resource?
+  </div>
+  <mat-form-field>
+    <mat-label>Manufacturer</mat-label>
+    <input matInput readonly value="{{this.source.data.mfr}}" />
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Model</mat-label>
+    <input matInput readonly value="{{this.source.data.model}}" />
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Firmware</mat-label>
+    <input matInput readonly value="{{this.source.data.firmware}}" />
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Cluster DNS</mat-label>
+    <input matInput readonly value="{{this.source.data.cluster_dns}}" />
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Cluster IP</mat-label>
+    <input matInput readonly value="{{this.source.data.cluster_ip}}" />
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>HA Configuration</mat-label>
+    <textarea
+      matInput
+      matTextareaAutosize="true"
+      readonly
+      value="{{this.source.data.ha_partner|json}}"
+    ></textarea>
+  </mat-form-field>
+</div>
+<div matDialogActions style="display: flex;">
+  <button
+    style="flex-grow: auto;"
+    mat-flat-button
+    matDialogClose
+    (click)="close()"
+  >
+    Cancel
+  </button>
+  <span style="flex-grow: 1;"></span>
+  <button
+    style="flex-grow: auto;"
+    mat-flat-button
+    [mat-dialog-close]="true"
+    (click)="commit()"
+    cdkFocusInitial
+  >
+    Commit
+  </button>
+</div>

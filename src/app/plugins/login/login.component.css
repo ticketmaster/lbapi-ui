@@ -1,0 +1,49 @@
+:host {
+  height: 100%;
+  display: block;
+/* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#026cdf+0,00ffff+100 */
+background: #026cdf; /* Old browsers */
+background: -moz-linear-gradient(top,  #026cdf 0%, #00ffff 100%); /* FF3.6-15 */
+background: -webkit-linear-gradient(top,  #026cdf 0%,#00ffff 100%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(to bottom,  #026cdf 0%,#00ffff 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#026cdf', endColorstr='#00ffff',GradientType=0 ); /* IE6-9 */
+
+}
+
+.mat-card {
+  width: 300px;
+}
+
+.mat-card-avatar {
+  object-fit: scale-down !important;
+}
+
+.mat-card-title {
+  font-weight: 500;
+  font-size:x-large;
+  color: #3396FF;
+}
+
+.mat-form-field {
+  display: block;
+  width: 100%;
+}
+
+.mart-card .button {
+  display: block;
+}
+
+.flex-container {
+  height: 100%;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button {
+  width: 100%;
+}

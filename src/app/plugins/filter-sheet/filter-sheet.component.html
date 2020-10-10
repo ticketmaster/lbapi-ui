@@ -1,0 +1,35 @@
+<h1 style="color:#026CDF">Help</h1>
+<div style="width:800px;margin-bottom:24px">
+The table uses "chips" <mat-chip>product_code=1813</mat-chip> to visually represent the user's query. To create a chip,
+enter any of the filter keys listed in the table below, followed by a value.
+</div>
+
+<div style="display:flex;align-content: center;">
+  <div style="color:#026CDF;flex-grow:auto;align-self:center;padding-top:7px"><mat-icon>info</mat-icon></div>
+  <div style="flex-grow:1;align-self: center;font-weight:500;font-size:20px">Tips</div>
+</div>
+<ul>
+  <li>Press ENTER, TAB or COMMA to commit the chip</li>
+  <li>Use '*' anywhere in the value for wildcard searches (e.g., name=*foo*)</li>
+  <li>Chips with the <em>same</em> filter key are treated as an 'OR'</li>
+  <li>Chips with <em>different</em> filter keys are treated as an 'AND'</li>
+</ul>
+
+<table mat-table [dataSource]="source" style="width:800px;margin-bottom:24px">
+    <ng-container matColumnDef="key">
+        <th mat-header-cell *matHeaderCellDef>Table Column</th>
+        <td mat-cell *matCellDef="let element"> {{element.Key}} </td>
+      </ng-container>
+    
+      <ng-container matColumnDef="value">
+        <th mat-header-cell *matHeaderCellDef>Filter Key</th>
+        <td mat-cell *matCellDef="let element" style="color:#0150A7;font-weight: 500;">{{element.Value}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="notes">
+        <th mat-header-cell *matHeaderCellDef>Notes</th>
+        <td mat-cell *matCellDef="let element"> {{element.Notes}} </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>

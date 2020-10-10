@@ -1,0 +1,69 @@
+.mat-card {
+  margin-bottom: 16px;
+}
+
+form {
+  width: 100%;
+  display: flex;
+  flex-flow: column;
+}
+
+.mat-panel-title,
+.validated {
+  display: flex;
+  flex-flow: row;
+}
+
+.mat-icon {
+  flex-grow: auto;
+  align-self: center;
+  margin-right: 10px;
+}
+
+.error {
+  color: #d93a3a;
+}
+
+.warn {
+  color: #F2BD2A;
+}
+
+.warn-msg {
+  color: #F2BD2A;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+
+.ok {
+  color: #1bab1e;
+}
+
+.code {
+  margin-top: 16px;
+  background-color: rgb(31, 38, 45);
+  color: #fff;
+  font-family: Roboto;
+}
+
+.validated-sub {
+  display: flex;
+  flex-flow: row;
+}
+.validated-sub .mat-icon {
+  margin-left: 28px;
+}
+
+.error-msg {
+  color: #d93a3a;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.validated div {
+  margin-right: 10px;
+}
+.check {
+  width: 150px;
+  font-weight: 500;
+}

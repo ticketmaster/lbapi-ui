@@ -1,0 +1,359 @@
+<mat-toolbar color="secondary" class="mat-elevation-z5">
+  <span class="secondary-heading">Virtual Services</span>
+  <span class="spacer"></span>
+  <button class="sub-menu" mat-icon-button [disableRipple]="true">
+    <mat-icon
+      #m="matMenuTrigger"
+      [innerHTML]="m.menuOpen ? 'menu_opened' : 'menu'"
+      [matMenuTriggerFor]="menu"
+      aria-label="Menu"
+      >menu</mat-icon
+    >
+  </button>
+  <mat-menu #menu="matMenu">
+    <button mat-menu-item (click)="this.add()">
+      <mat-icon>add_box</mat-icon>
+      <span>Add Record</span>
+    </button>
+    <button mat-menu-item (click)="this.openRestore()">
+      <mat-icon>restore_from_trash</mat-icon>
+      <span>Recycle Bin</span>
+    </button>
+    <button
+      mat-menu-item
+      (click)="downloadFile(this.dataSource.records$.value)"
+    >
+      <mat-icon>save_alt</mat-icon>
+      <span>Download CSV</span>
+    </button>
+    <mat-divider></mat-divider>
+    <button mat-menu-item (click)="this.viewUser()">
+      <mat-icon>account_circle</mat-icon>
+      <span>Account</span>
+    </button>
+    <button mat-menu-item (click)="this.token.clear()">
+      <mat-icon>logout</mat-icon>
+      <span>Log Out</span>
+    </button>
+  </mat-menu>
+</mat-toolbar>
+<div class="content">
+  <form
+    (keydown.enter)="$event.preventDefault()"
+    style="display: flex; width: 100%;"
+  >
+    <div style="flex-grow: auto; align-self: center; margin-right: 10px;"></div>
+    <mat-form-field style="flex-grow: 1;">
+      <mat-chip-list aria-label="Filter" #searchList>
+        <mat-icon matPrefex>search</mat-icon>
+        <mat-chip
+          *ngFor="let s of search"
+          [selectable]="selectable"
+          [removable]="removable"
+          (removed)="removeSearchOption(s)"
+        >
+          {{ s }}
+
+          <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+        </mat-chip>
+        <input
+          style="height: 32px;"
+          id="search-box"
+          [matChipInputFor]="searchList"
+          [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+          [matChipInputAddOnBlur]="addOnBlur"
+          (matChipInputTokenEnd)="addSearchOption($event)"
+        />
+        <button
+          mat-icon-button
+          matSuffix
+          (click)="clear()"
+          matTooltip="Clear"
+          matTooltipPosition="left"
+        >
+          <mat-icon matSuffix>clear</mat-icon>
+        </button>
+        <div
+          matSuffix
+          style="
+            width: 2px;
+            background-color: #dfe1e5;
+            margin: 0 2px;
+            font-size: 24px;
+          "
+        >
+          &nbsp;
+        </div>
+        <button
+          mat-icon-button
+          matSuffix
+          (click)="openFilterList()"
+          matTooltip="Help"
+          matTooltipPosition="left"
+        >
+          <mat-icon class="help">help</mat-icon>
+        </button>
+      </mat-chip-list>
+    </mat-form-field>
+  </form>
+  <div
+    style="
+      display: flex;
+      justify-content: center;
+      align-content: center;
+      margin-bottom: 16px;
+    "
+  >
+    <mat-button-toggle-group>
+      <mat-button-toggle [disableRipple]="true" class="button-group-icon">
+        <mat-icon>filter_list</mat-icon>
+      </mat-button-toggle>
+      <mat-button-toggle (click)="filterByProductCode()"
+        >My Products</mat-button-toggle
+      >
+      <mat-button-toggle (click)="filterByMfr('avi networks')"
+        >Avi</mat-button-toggle
+      >
+      <mat-button-toggle (click)="filterByMfr('netscaler')"
+        >Netscaler</mat-button-toggle
+      >
+      <mat-button-toggle (click)="filterByEnabled(true)"
+        >Enabled</mat-button-toggle
+      >
+      <mat-button-toggle (click)="filterByEnabled(false)"
+        >Disabled</mat-button-toggle
+      >
+    </mat-button-toggle-group>
+  </div>
+  <div class="mat-elevation-z0" style="position: relative;">
+    <div class="spinner-container" *ngIf="dataSource.loading$ | async">
+      <mat-spinner> </mat-spinner>
+    </div>
+    <mat-table
+      [dataSource]="dataSource"
+      matSort
+      matSortActive="product_code"
+      matSortDirection="asc"
+      matSortDisableClear
+      id="ExampleMaterialTable"
+    >
+      <ng-container matColumnDef="load_balancer_ip">
+        <mat-header-cell *matHeaderCellDef mat-sort-header
+          >Load Balancer</mat-header-cell
+        >
+        <mat-cell *matCellDef="let row">
+          <span
+            class="label"
+            matTooltipPosition="left"
+            [matTooltip]="this.getLoadBalancerName(row._load_balancer.dns)"
+          >
+            <a
+              target="_blank"
+              [href]="
+                'https://' + this.getLoadBalancerName(row._load_balancer.dns)
+              "
+              >{{ row.load_balancer_ip }}</a
+            ></span
+          >
+        </mat-cell>
+      </ng-container>
+      >
+      <ng-container matColumnDef="platform">
+        <mat-header-cell *matHeaderCellDef mat-sort-header
+          >Platform</mat-header-cell
+        >
+        <mat-cell *matCellDef="let row">
+          <span
+            class="label"
+            [matTooltip]="row._load_balancer.mfr"
+            matTooltipPosition="left"
+            style="text-transform: capitalize; font-weight: 500;"
+            [ngClass]="{
+              'avi-label': row._load_balancer.mfr != 'netscaler',
+              'netscaler-label': row._load_balancer.mfr == 'netscaler'
+            }"
+          >
+            {{ row._load_balancer.mfr.substring(0, 1) }}</span
+          >
+        </mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="status">
+        <mat-header-cell *matHeaderCellDef mat-sort-header
+          >Status</mat-header-cell
+        >
+        <mat-cell *matCellDef="let row">
+          <span
+            class="label"
+            style="text-transform: capitalize; font-weight: 500;"
+          >
+            {{ row._source_status }}</span
+          >
+        </mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="product_code">
+        <mat-header-cell *matHeaderCellDef mat-sort-header
+          >Product Code</mat-header-cell
+        >
+        <mat-cell *matCellDef="let row">{{ row.data.product_code }}</mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="ip">
+        <mat-header-cell *matHeaderCellDef mat-sort-header>IP</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          <span
+            style="cursor: default;"
+            matTooltip="{{ row.data.dns }}"
+            matTooltipPosition="left"
+            >{{ row.data.ip }}</span
+          >
+        </mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="port">
+        <mat-header-cell *matHeaderCellDef>Port</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          <ng-template ngFor let-item [ngForOf]="row.data.ports" let-i="index">
+            <span
+              class="port-label"
+              [style.backgroundColor]="
+                row.data.ports[i].l4_profile != undefined &&
+                row.data.ports[i].l4_profile.includes('tcp')
+                  ? '#148016'
+                  : '#026CDF'
+              "
+              matTooltipPosition="left"
+              [matTooltip]="
+                row.data.ports[i].l4_profile != undefined &&
+                row.data.ports[i].l4_profile.includes('tcp')
+                  ? 'TCP'
+                  : 'UDP'
+              "
+              >{{ row.data.ports[i].port }}</span
+            >
+          </ng-template>
+        </mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="service_type">
+        <mat-header-cell *matHeaderCellDef mat-sort-header
+          >Service</mat-header-cell
+        >
+        <mat-cell *matCellDef="let row">
+          {{ row.data.service_type }}
+        </mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="dns">
+        <mat-header-cell *matHeaderCellDef>
+          DNS
+        </mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          <div>{{ row.data.dns }}</div>
+        </mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="_last_30">
+        <mat-header-cell *matHeaderCellDef mat-sort-header>
+          Uptime Last 30
+        </mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          <div *ngIf="row._load_balancer.mfr==='netscaler'">{{ row.data._last_30 }}%</div>
+        </mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="name">
+        <mat-header-cell
+          style="flex-grow: 2; white-space: initial;"
+          *matHeaderCellDef
+          mat-sort-header
+          >Name
+        </mat-header-cell>
+        <mat-cell
+          style="flex-grow: 2; white-space: initial;"
+          *matCellDef="let row"
+          matTooltip="{{ row.data.name }}"
+          matTooltipPosition="left"
+        >
+          {{ row.data.name }}
+        </mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="enabled">
+        <mat-header-cell *matHeaderCellDef mat-sort-header
+          >Enabled</mat-header-cell
+        >
+        <mat-cell *matCellDef="let row">
+          <div>
+            <mat-icon
+              matTooltip="Enabled"
+              matTooltipPosition="before"
+              *ngIf="row.data.enabled"
+              style="color: #148016; cursor: default;"
+            >
+              play_circle_outline</mat-icon
+            >
+            <mat-icon
+              matTooltip="Disabled"
+              matTooltipPosition="before"
+              *ngIf="!row.data.enabled"
+              style="color: #8f9296; cursor: default;"
+              >pause_circle_outline
+            </mat-icon>
+            <span></span>
+          </div>
+        </mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="edit">
+        <mat-header-cell *matHeaderCellDef></mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          <span class="spacer"></span>
+          <button
+            [disabled]="!this.token.testMembership(row.data.product_code) || isDisabled(row._source_status)"
+            *ngIf="row._load_balancer.mfr == 'netscaler'"
+            mat-icon-button
+            matTooltip="Migrate Record"
+            matTooltipPosition="left"
+            (click)="migrate(row)"
+            [attr.aria-label]="'Edit'"
+          >
+            <mat-icon>swap_horizontal</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            matTooltip="Metrics"
+            matTooltipPosition="left"
+            [attr.aria-label]="'Metrics'"
+            (click)="goToMetrics(row._load_balancer.mfr, row.data.name)"
+          >
+            <mat-icon>insert_chart_outlined</mat-icon>
+          </button>
+          <button
+            [disabled]="
+              !this.token.testMembership(row.data.product_code) ||
+              row._source_status === 'migrated' || isDisabled(row._source_status)
+            "
+            mat-icon-button
+            matTooltip="Edit Record"
+            matTooltipPosition="left"
+            (click)="edit(row)"
+            [attr.aria-label]="'Edit'"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button
+            [disabled]="!this.token.testMembership(row.data.product_code) || isDisabled(row._source_status)"
+            mat-icon-button
+            matTooltip="Delete Record"
+            matTooltipPosition="left"
+            [attr.aria-label]="'Delete'"
+            class="del-icon"
+            (click)="delete(row)"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </mat-cell>
+      </ng-container>
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+    </mat-table>
+    <mat-paginator
+      [length]="dataSource.sql"
+      [pageSize]="10"
+      [pageSizeOptions]="[3, 5, 10, 25, 50, 100]"
+    >
+    </mat-paginator>
+  </div>
+</div>

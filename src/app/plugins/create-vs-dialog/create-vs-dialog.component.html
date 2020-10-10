@@ -1,0 +1,1089 @@
+<div *ngIf="!(this.lbDataSource.loading$ | async) && !(this.vsDataSource.loading$ | async)">
+  <form #f="ngForm" (ngSubmit)="onSubmit(f)">
+    <div mat-dialog-title>
+      <mat-toolbar class="dialog-header mat-elevation-z2">
+        <span class="dialog-title">{{ this.alias }}</span>
+        <span class="spacer"></span>
+        <span class="toggle-suffix">
+          <mat-slide-toggle
+            matTooltipPosition="below"
+            matTooltip="Click to Enable/Disable"
+            labelPosition="before"
+            (change)="dbRecord.data.enabled = $event.checked"
+            [checked]="dbRecord.data.enabled"
+          >
+            <span *ngIf="dbRecord.data.enabled === true">
+              Enabled
+            </span>
+            <span *ngIf="dbRecord.data.enabled === false">
+              Disabled
+            </span>
+          </mat-slide-toggle>
+        </span>
+      </mat-toolbar>
+    </div>
+    <div mat-dialog-content>
+      <div class="flex-row">
+        <mat-form-field>
+          <mat-label>Alias</mat-label>
+          <input
+            matInput
+            required
+            [(ngModel)]="dbRecord.data.name"
+            name="name"
+            #data_name
+            (blur)="setName(data_name.value)"
+          />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-chip-list #chipList aria-label="DNS">
+            <mat-chip
+              *ngFor="let e of dbRecord.data.dns"
+              [selectable]="true"
+              [removable]="true"
+              (removed)="removeDnsRecord(e)"
+            >
+              {{ e }}
+              <mat-icon matChipRemove>cancel</mat-icon>
+            </mat-chip>
+            <input
+              placeholder="DNS"
+              [matChipInputFor]="chipList"
+              [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+              [matChipInputAddOnBlur]="true"
+              (matChipInputTokenEnd)="addDnsRecord($event)"
+            />
+          </mat-chip-list>
+        </mat-form-field>
+      </div>
+      <div class="flex-row">
+        <mat-form-field>
+          <mat-label>Product Code</mat-label>
+          <mat-select
+            [value]="dbRecord.data.product_code"
+            required
+            [(ngModel)]="dbRecord.data.product_code"
+            name="product_code"
+            (selectionChange)="
+              dbRecord.data.product_code = $event.value;
+              setName(data_name.value)
+            "
+          >
+            <mat-option *ngFor="let p of this.productCodes" [value]="p">{{
+              p
+            }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field *ngIf="adminAccess">
+          <mat-label>IP Address</mat-label>
+          <input
+            matInput
+            [readonly]="!adminAccess"
+            (blur)="dbRecord.data.ip = $event.target.value"
+            [(ngModel)]="dbRecord.data.ip"
+            name="ip"
+          />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Shared IP</mat-label>
+          <input
+            matInput
+            aria-label="shared ip"
+            [matAutocomplete]="auto"
+            [formControl]="sharedIPControl"
+            (blur)="setShared($event.target.value)"
+            >
+          <mat-autocomplete #auto="matAutocomplete">
+            <mat-option
+              *ngFor="let i of this.filteredVs | async"
+              [value]="i.ip"
+            >
+              <span>{{ i.ip }}</span> |
+              <small>{{ i.name }}</small>
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+      </div>
+      <div class="flex-row">
+        <mat-form-field>
+          <mat-label>Service Type</mat-label>
+          <mat-select
+            value="{{ dbRecord.data.service_type }}"
+            name="service-type"
+            (selectionChange)="dbRecord.data.service_type = $event.value"
+          >
+            <mat-option value="http">
+              HTTP
+            </mat-option>
+            <mat-option *ngIf="!isNetscaler" value="http-multiplex-disabled">
+              HTTP (Multiplexing Disabled)
+            </mat-option>
+            <mat-option *ngIf="!isNetscaler" value="https">
+              HTTPS
+            </mat-option>
+            <mat-option *ngIf="!isNetscaler" value="https-no-secure-cookies">
+              HTTPS (Secure Cookies Disabled)
+            </mat-option>
+            <mat-option value="dns">
+              DNS
+            </mat-option>
+            <mat-option *ngIf="!isNetscaler" value="syslog">
+              Syslog
+            </mat-option>
+            <mat-option value="ssl-bridge">
+              SSL-Bridge
+            </mat-option>
+            <mat-option *ngIf="!isNetscaler" value="ssl-l4-app">
+              SSL-L4-APP
+            </mat-option>
+            <mat-option *ngIf="!isNetscaler" value="ssl-vdi">
+              SSL-VDI
+            </mat-option>
+            <mat-option *ngIf="!isNetscaler" value="l4-app">
+              Layer 4 Application
+            </mat-option>
+            <mat-option *ngIf="isNetscaler" value="l4-app-tcp">
+              Layer 4 Application (TCP)
+            </mat-option>
+            <mat-option *ngIf="isNetscaler" value="l4-app-udp">
+              Layer 4 Application (UDP)
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Load Balancing Method</mat-label>
+          <mat-select
+            value="{{ dbRecord.data.load_balancing_method }}"
+            name="lb-method"
+            (selectionChange)="
+              dbRecord.data.load_balancing_method = $event.value
+            "
+          >
+            <mat-option value="roundrobin">
+              Round Robin
+            </mat-option>
+            <mat-option value="leastconnection">
+              Least Connections
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="flex-row">
+        <mat-form-field>
+          <mat-label>Load Balancer</mat-label>
+          <mat-select
+            [disabled]="!adminAccess"
+            [(ngModel)]="dbRecord.load_balancer_ip"
+            name="load_balancer_ip"
+            value="{{ dbRecord.load_balancer_ip }}"
+            (selectionChange)="setLb($event.value)"
+          >
+            <mat-option value="">
+              Auto Assign
+            </mat-option>
+            <mat-option *ngFor="let p of this.listLb" [value]="p.ip">{{
+              p.name
+            }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Platform</mat-label>
+          <mat-select
+            value="{{ dbRecord.platform }}"
+            (selectionChange)="dbRecord.platform = $event.value; setLbField()"
+          >
+            <mat-option value="" *ngIf="adminAccess">
+              Auto Assign
+            </mat-option>
+            <mat-option value="netscaler">
+              NETSCALER
+            </mat-option>
+            <mat-option value="avi networks">
+              AVI NETWORKS
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <mat-accordion displayMode="flat">
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon inline="true" class="expansion-icon">dns</mat-icon>
+              Network
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <mat-tab-group>
+            <mat-tab label="Ports">
+              <ng-template
+                ngFor
+                let-item
+                [ngForOf]="dbRecord.data.ports"
+                let-i="index"
+              >
+                <mat-card>
+                  <mat-card-content>
+                    <div class="flex-row">
+                      <mat-form-field>
+                        <mat-label>Port</mat-label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="65535"
+                          required
+                          [(ngModel)]="dbRecord.data.ports[i].port"
+                          name="{{ i }}-port"
+                          matInput
+                          value="{{ dbRecord.data.ports[i].port }}"
+                          (blur)="
+                            dbRecord.data.ports[i].port = this.pInt(
+                              $event.target.value
+                            )
+                          "
+                        />
+                        <mat-hint align="end">1-65535</mat-hint>
+                      </mat-form-field>
+                      <mat-form-field>
+                        <mat-label>L4 Protocol</mat-label>
+                        <mat-select
+                          value="{{ dbRecord.data.ports[i].l4_profile }}"
+                          (selectionChange)="
+                            dbRecord.data.ports[i].l4_profile = $event.value
+                          "
+                          required
+                          [(ngModel)]="dbRecord.data.ports[i].l4_profile"
+                          name="{{ i }}-l4_profile"
+                        >
+                          <mat-option value="tcp">
+                            TCP
+                          </mat-option>
+                          <mat-option value="udp">
+                            UDP
+                          </mat-option>
+                          <mat-option
+                            value="udp-fast-path-vdi"
+                            *ngIf="!isNetscaler"
+                          >
+                            UDP Fast Path VDI
+                          </mat-option>
+                          <mat-option value="udp-no-snat" *ngIf="!isNetscaler">
+                            UDP No-SNAT
+                          </mat-option>
+                          <mat-option value="udp-per-pkt" *ngIf="!isNetscaler">
+                            UDP Per Packet
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                      <span class="suffix">
+                        <mat-checkbox
+                          (change)="
+                            dbRecord.data.ports[i].ssl_enabled = $event.checked
+                          "
+                          [checked]="dbRecord.data.ports[i].ssl_enabled"
+                          [disabled]="this.isNetscaler"
+                          >SSL</mat-checkbox
+                        >
+                      </span>
+                      <span class="icon-suffix">
+                        <button
+                          type="button"
+                          mat-icon-button
+                          [disabled]="i == 0"
+                          (click)="removePort(i)"
+                        >
+                          <mat-icon>delete</mat-icon>
+                        </button>
+                      </span>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+              </ng-template>
+              <div class="add-row">
+                <button
+                  mat-raised-button
+                  [disabled]="isNetscaler"
+                  color="primary"
+                  (click)="addPort()"
+                  type="button"
+                >
+                  Add Port
+                </button>
+              </div>
+            </mat-tab>
+            <mat-tab label="Certificate" [disabled]="this.isNetscaler">
+              <div
+                *ngIf="
+                  dbRecord.data.certificates != undefined &&
+                    dbRecord.data.certificates[0]._uuid != undefined;
+                  then certificates_thenBlock;
+                  else certificates_elseBlock
+                "
+              ></div>
+              <ng-template #certificates_thenBlock>
+                <mat-card>
+                  <mat-card-content>
+                    <div class="flex-row">
+                      <mat-form-field>
+                        <mat-label>Name</mat-label>
+                        <input
+                          matInput
+                          disabled
+                          value="{{ dbRecord.data.certificates[0].name }}"
+                        />
+                      </mat-form-field>
+                      <mat-form-field>
+                        <mat-label>Common Name</mat-label>
+                        <input
+                          matInput
+                          disabled
+                          value="{{
+                            dbRecord.data.certificates[0]._common_name
+                          }}"
+                        />
+                      </mat-form-field>
+                    </div>
+                    <div class="flex-row">
+                      <mat-form-field>
+                        <mat-label>Serial Number</mat-label>
+                        <input
+                          matInput
+                          disabled
+                          value="{{
+                            dbRecord.data.certificates[0]._serial_number
+                          }}"
+                        />
+                      </mat-form-field>
+                      <mat-form-field>
+                        <mat-label>Expiration Date (UTC)</mat-label>
+                        <input
+                          matInput
+                          disabled
+                          value="{{
+                            dbRecord.data.certificates[0]._expiry
+                              | date: 'medium'
+                          }}"
+                        />
+                      </mat-form-field>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+              </ng-template>
+              <ng-template #certificates_elseBlock>
+                <mat-card>
+                  <mat-card-content>
+                    <div class="flex-row">
+                      <mat-form-field>
+                        <mat-label>Public Key</mat-label>
+                        <textarea
+                          (blur)="updateCertificate($event, 'public')"
+                          matInput
+                          placeholder="PEM Formatted"
+                        ></textarea>
+                      </mat-form-field>
+                    </div>
+                    <div class="flex-row">
+                      <mat-form-field>
+                        <mat-label>Private Key</mat-label>
+                        <textarea
+                          name="private_key"
+                          (blur)="updateCertificate($event, 'private')"
+                          matInput
+                          placeholder="PEM Formatted"
+                        ></textarea>
+                      </mat-form-field>
+                    </div>
+                    <div class="flex-row">
+                      <mat-form-field>
+                        <mat-label>Pass Phrase</mat-label>
+                        <input
+                          type="password"
+                          matInput
+                          (blur)="updateCertificate($event, 'passphrase')"
+                        />
+                      </mat-form-field>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+              </ng-template>
+            </mat-tab>
+          </mat-tab-group>
+        </mat-expansion-panel>
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon inline="true" class="expansion-icon"
+                >account_tree</mat-icon
+              >
+              Pools
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <ng-template
+            ngFor
+            let-item
+            [ngForOf]="dbRecord.data.pools"
+            let-i="index"
+          >
+            <mat-expansion-panel>
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  {{ dbRecord.data.pools[i].name }}
+                  <span *ngIf="dbRecord.data.pools[i].default_port"
+                    >:{{ dbRecord.data.pools[i].default_port }}</span
+                  >
+                  <span class="spacer"></span>
+                  <mat-icon
+                    (click)="removePool(i)"
+                    color="basic"
+                    style="
+                      line-height: 24px;
+                      font-size: 22px;
+                      text-align: center;
+                      vertical-align: middle;
+                      color: #666;
+                    "
+                    >delete</mat-icon
+                  >
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+              <mat-tab-group mat-align-tabs="start">
+                <mat-tab label="Pool">
+                  <mat-card>
+                    <mat-card-content>
+                      <div class="flex-row">
+                        <div class="row-toggle">
+                          <mat-slide-toggle
+                            matTooltipPosition="below"
+                            matTooltip="Click to Enable/Disable"
+                            (change)="
+                              dbRecord.data.pools[i].enabled = $event.checked
+                            "
+                            [checked]="dbRecord.data.pools[i].enabled"
+                          >
+                          </mat-slide-toggle>
+                          <div>
+                            <span
+                              *ngIf="dbRecord.data.pools[i].enabled === true"
+                            >
+                              Enabled
+                            </span>
+                            <span
+                              *ngIf="dbRecord.data.pools[i].enabled === false"
+                            >
+                              Disabled
+                            </span>
+                          </div>
+                        </div>
+                        <mat-form-field>
+                          <mat-label>Name</mat-label>
+                          <input
+                            matInput
+                            disabled
+                            value="{{ dbRecord.data.pools[i].name }}"
+                          />
+                        </mat-form-field>
+                        <mat-form-field>
+                          <mat-label>Default Port</mat-label>
+                          <input
+                            type="number"
+                            min="0"
+                            max="65535"
+                            [disabled]="!defaultPortRequired(i)"
+                            [required]="defaultPortRequired(i)"
+                            [value]="!defaultPortRequired(i) ? null : 0"
+                            [(ngModel)]="dbRecord.data.pools[i].default_port"
+                            name="{{ i }}-default_port"
+                            matInput
+                            (blur)="
+                              dbRecord.data.pools[i].default_port = this.pInt(
+                                $event.target.value
+                              )
+                            "
+                            value="{{ dbRecord.data.pools[i].default_port }}"
+                          />
+                          <mat-hint align="end">1-65535</mat-hint>
+                        </mat-form-field>
+                      </div>
+                      <div class="flex-row">
+                        <div class="flex-col">
+                          <span class="flex-radio">
+                            <mat-checkbox
+                              (change)="
+                                dbRecord.data.pools[i].graceful_disable =
+                                  $event.checked
+                              "
+                              [checked]="
+                                dbRecord.data.pools[i].graceful_disable
+                              "
+                              >Disable Gracefully?</mat-checkbox
+                            >
+                          </span>
+                          <span class="flex-radio">
+                            <mat-checkbox
+                              (change)="
+                                dbRecord.data.pools[i].is_nsr_service =
+                                  $event.checked
+                              "
+                              [disabled]="!this.isNetscaler"
+                              (click)="trimBindings($event.value, i)"
+                              [checked]="dbRecord.data.pools[i].is_nsr_service"
+                              >Netscaler Service?</mat-checkbox
+                            >
+                          </span>
+                          <span class="flex-radio">
+                            <mat-checkbox
+                              (change)="
+                                dbRecord.data.pools[i].ssl_enabled =
+                                  $event.checked
+                              "
+                              [disabled]="this.isNetscaler"
+                              [checked]="dbRecord.data.pools[i].ssl_enabled"
+                              >SSL
+                            </mat-checkbox>
+                          </span>
+                        </div>
+                      </div>
+                    </mat-card-content>
+                  </mat-card>
+                </mat-tab>
+                <mat-tab label="Bindings">
+                  <ng-template
+                    ngFor
+                    let-item
+                    [ngForOf]="dbRecord.data.pools[i].bindings"
+                    let-ii="index"
+                  >
+                    <mat-card>
+                      <mat-card-content>
+                        <div class="flex-row">
+                          <div class="row-toggle">
+                            <mat-slide-toggle
+                              matTooltipPosition="below"
+                              matTooltip="Click to Enable/Disable"
+                              (change)="
+                                dbRecord.data.pools[i].bindings[ii].enabled =
+                                  $event.checked
+                              "
+                              [checked]="
+                                dbRecord.data.pools[i].bindings[ii].enabled
+                              "
+                            >
+                            </mat-slide-toggle>
+                            <div>
+                              <span
+                                *ngIf="
+                                  dbRecord.data.pools[i].bindings[ii]
+                                    .enabled === true
+                                "
+                              >
+                                Enabled
+                              </span>
+                              <span
+                                *ngIf="
+                                  dbRecord.data.pools[i].bindings[ii]
+                                    .enabled === false
+                                "
+                              >
+                                Disabled
+                              </span>
+                            </div>
+                          </div>
+                          <mat-form-field>
+                            <mat-label>IP</mat-label>
+                            <input
+                              matInput
+                              required
+                              [(ngModel)]="
+                                dbRecord.data.pools[i].bindings[ii].server.ip
+                              "
+                              name="{{ i }}-{{ ii }}.server.ip"
+                              (blur)="
+                                dbRecord.data.pools[i].bindings[ii].server.ip =
+                                  $event.target.value
+                              "
+                              [disabled]="
+                                dbRecord.data.pools[i].bindings[ii].server
+                                  ._uuid !== undefined
+                              "
+                              value="{{
+                                dbRecord.data.pools[i].bindings[ii].server.ip
+                              }}"
+                            />
+                          </mat-form-field>
+                          <mat-form-field>
+                            <mat-label>Port</mat-label>
+                            <input
+                              type="number"
+                              min="0"
+                              max="65535"
+                              matInput
+                              [required]="bindingPortRequired(i)"
+                              [disabled]="!bindingPortRequired(i)"
+                              [value]="!bindingPortRequired(i) ? null : 0"
+                              [(ngModel)]="
+                                dbRecord.data.pools[i].bindings[ii].port
+                              "
+                              name="{{ i }}-{{ ii }}-port"
+                              (blur)="
+                                dbRecord.data.pools[i].bindings[
+                                  ii
+                                ].port = this.pInt($event.target.value)
+                              "
+                              value="{{
+                                dbRecord.data.pools[i].bindings[ii].port
+                              }}"
+                            />
+                            <mat-hint align="end">1-65535</mat-hint>
+                          </mat-form-field>
+                          <span class="icon-suffix">
+                            <button
+                              mat-icon-button
+                              type="button"
+                              (click)="removeBinding(i, ii)"
+                            >
+                              <mat-icon>delete</mat-icon>
+                            </button>
+                          </span>
+                        </div>
+                      </mat-card-content>
+                    </mat-card>
+                  </ng-template>
+                  <div class="add-row">
+                    <button
+                      type="button"
+                      mat-raised-button
+                      color="primary"
+                      [disabled]="
+                        dbRecord.data.pools[i].bindings.length >= 1 &&
+                        dbRecord.data.pools[i].is_nsr_service
+                      "
+                      (click)="addBinding(i)"
+                    >
+                      Add Binding
+                    </button>
+                  </div>
+                </mat-tab>
+                <mat-tab label="Health Monitors">
+                  <ng-template
+                    ngFor
+                    let-item
+                    [ngForOf]="dbRecord.data.pools[i].health_monitors"
+                    let-ii="index"
+                  >
+                    <mat-card>
+                      <mat-card-content>
+                        <div
+                          class="flex-row"
+                          *ngIf="
+                            dbRecord.data.pools[i].health_monitors[ii]._uuid !=
+                            ''
+                          "
+                        ></div>
+                        <div class="flex-row">
+                          <mat-form-field>
+                            <mat-label>Type</mat-label>
+                            <mat-select
+                              value="{{
+                                dbRecord.data.pools[i].health_monitors[ii].type
+                              }}"
+                              required
+                              id="type-{{ i }}-{{ ii }}"
+                              (selectionChange)="
+                                updateFields($event, i, ii);
+                                dbRecord.data.pools[i].health_monitors[
+                                  ii
+                                ].type = $event.value
+                              "
+                            >
+                              <mat-option value="tcp">
+                                TCP
+                              </mat-option>
+                              <mat-option *ngIf="isNetscaler" value="tcp-ecv">
+                                TCP-ECV
+                              </mat-option>
+                              <mat-option value="http">
+                                HTTP
+                              </mat-option>
+                              <mat-option *ngIf="isNetscaler" value="http-ecv">
+                                HTTP-ECV
+                              </mat-option>
+                              <mat-option value="https">
+                                HTTPS
+                              </mat-option>
+                              <mat-option *ngIf="isNetscaler" value="https-ecv">
+                                HTTPS-ECV
+                              </mat-option>
+                              <mat-option value="external" *ngIf="!isNetscaler">
+                                External
+                              </mat-option>
+                            </mat-select>
+                          </mat-form-field>
+                          <mat-form-field>
+                            <mat-label>Monitor Port</mat-label>
+                            <input
+                              type="number"
+                              min="0"
+                              [disabled]="isNetscaler"
+                              (blur)="
+                                dbRecord.data.pools[i].health_monitors[
+                                  ii
+                                ].monitor_port = this.pInt($event.target.value)
+                              "
+                              max="65535"
+                              matInput
+                              value="{{
+                                dbRecord.data.pools[i].health_monitors[ii]
+                                  .monitor_port
+                              }}"
+                            />
+                            <mat-hint align="end">1-65535</mat-hint>
+                          </mat-form-field>
+                        </div>
+                        <div class="flex-row">
+                          <mat-form-field>
+                            <mat-label>Send Interval</mat-label>
+                            <input
+                              matInput
+                              type="number"
+                              (blur)="
+                                dbRecord.data.pools[i].health_monitors[
+                                  ii
+                                ].send_interval = this.pInt($event.target.value)
+                              "
+                              value="{{
+                                dbRecord.data.pools[i].health_monitors[ii]
+                                  .send_interval
+                              }}"
+                            />
+                          </mat-form-field>
+                          <mat-form-field>
+                            <mat-label>Receive Timeout</mat-label>
+                            <input
+                              matInput
+                              type="number"
+                              (blur)="
+                                dbRecord.data.pools[i].health_monitors[
+                                  ii
+                                ].receive_timeout = this.pInt(
+                                  $event.target.value
+                                )
+                              "
+                              value="{{
+                                dbRecord.data.pools[i].health_monitors[ii]
+                                  .receive_timeout
+                              }}"
+                            />
+                          </mat-form-field>
+                        </div>
+                        <div
+                          class="flex-row"
+                          id="request-{{ i }}-{{ ii }}"
+                          [style.display]="
+                            dbRecord.data.pools[i].health_monitors[ii].type !=
+                              undefined &&
+                            (dbRecord.data.pools[i].health_monitors[
+                              ii
+                            ].type.includes('ecv') ||
+                              dbRecord.data.pools[i].health_monitors[
+                                ii
+                              ].type.includes('http') ||
+                              dbRecord.data.pools[i].health_monitors[
+                                ii
+                              ].type.includes('external'))
+                              ? 'flex'
+                              : 'none'
+                          "
+                        >
+                          <mat-form-field>
+                            <mat-label>Request</mat-label>
+                            <textarea
+                              matInput
+                              placeholder="HTTP Request or Script"
+                              (blur)="
+                                dbRecord.data.pools[i].health_monitors[
+                                  ii
+                                ].request = $event.target.value
+                              "
+                              >{{
+                                dbRecord.data.pools[i].health_monitors[ii]
+                                  .request
+                              }}</textarea
+                            >
+                          </mat-form-field>
+                        </div>
+                        <div
+                          class="flex-row"
+                          id="response-{{ i }}-{{ ii }}"
+                          [style.display]="
+                            dbRecord.data.pools[i].health_monitors[ii].type !=
+                              undefined &&
+                            (dbRecord.data.pools[i].health_monitors[
+                              ii
+                            ].type.includes('ecv') ||
+                              dbRecord.data.pools[i].health_monitors[
+                                ii
+                              ].type.includes('http') ||
+                              dbRecord.data.pools[i].health_monitors[
+                                ii
+                              ].type.includes('external'))
+                              ? 'flex'
+                              : 'none'
+                          "
+                        >
+                          <mat-form-field>
+                            <mat-label>Response</mat-label>
+                            <textarea
+                              matInput
+                              placeholder="HTTP Response"
+                              (blur)="
+                                dbRecord.data.pools[i].health_monitors[
+                                  ii
+                                ].response = $event.target.value
+                              "
+                              >{{
+                                dbRecord.data.pools[i].health_monitors[ii]
+                                  .response
+                              }}</textarea
+                            >
+                          </mat-form-field>
+                        </div>
+                        <div
+                          class="flex-row"
+                          id="responsecode-{{ i }}-{{ ii }}"
+                          [style.display]="
+                            dbRecord.data.pools[i].health_monitors[ii].type !=
+                              undefined &&
+                            dbRecord.data.pools[i].health_monitors[
+                              ii
+                            ].type.includes('http')
+                              ? 'flex'
+                              : 'none'
+                          "
+                        >
+                          <mat-form-field>
+                            <mat-chip-list
+                              #chipList
+                              aria-label="Response Codes"
+                            >
+                              <mat-chip
+                                *ngFor="
+                                  let code of dbRecord.data.pools[i]
+                                    .health_monitors[ii].response_codes
+                                "
+                                [selectable]="true"
+                                [removable]="true"
+                                (removed)="removeResponseCode(code, i, ii)"
+                              >
+                                {{ code }}
+                                <mat-icon matChipRemove>cancel</mat-icon>
+                              </mat-chip>
+                              <input
+                                placeholder="Response Codes"
+                                [matChipInputFor]="chipList"
+                                [matChipInputSeparatorKeyCodes]="
+                                  separatorKeysCodes
+                                "
+                                [matChipInputAddOnBlur]="true"
+                                (matChipInputTokenEnd)="
+                                  addResponseCode($event, i, ii)
+                                "
+                              />
+                            </mat-chip-list>
+                          </mat-form-field>
+                        </div>
+                      </mat-card-content>
+                      <mat-card-actions>
+                        <div class="delete-row">
+                          <button
+                            type="button"
+                            mat-icon-button="warn"
+                            (click)="removeHealthMonitor(i, ii)"
+                          >
+                            <mat-icon>delete</mat-icon>
+                          </button>
+                        </div>
+                      </mat-card-actions>
+                    </mat-card>
+                  </ng-template>
+                  <div class="add-row">
+                    <button
+                      type="button"
+                      mat-raised-button
+                      color="primary"
+                      (click)="addHealthMonitor(i)"
+                    >
+                      Add Health Monitor
+                    </button>
+                  </div>
+                </mat-tab>
+                <mat-tab label="Persistence" *ngIf="!isNetscaler">
+                  <div
+                    *ngIf="
+                      dbRecord.data.pools[i].persistence === undefined;
+                      then emptyPersistence;
+                      else addPersistence
+                    "
+                  ></div>
+                  <ng-template #emptyPersistence>
+                    <div class="add-row">
+                      <button
+                        type="button"
+                        mat-raised-button
+                        color="primary"
+                        (click)="dbRecord.data.pools[i].persistence = {}"
+                      >
+                        Add Persistence
+                      </button>
+                    </div>
+                  </ng-template>
+
+                  <ng-template #addPersistence>
+                    <mat-card>
+                      <mat-card-content>
+                        <div class="flex-row" *ngIf="dbRecord.data.pools[i].persistence._uuid != undefined"
+                        >
+                          <mat-form-field
+                            *ngIf="dbRecord.data.pools[i].persistence._uuid != undefined"
+                          >
+                            <mat-label>Name</mat-label>
+                            <input
+                              matInput
+                              readonly
+                              value="{{dbRecord.data.pools[i].persistence.name}}"
+                            />
+                          </mat-form-field>
+                        </div>
+                        <div class="flex-row">
+                          <mat-form-field>
+                            <mat-label>Type</mat-label>
+                            <mat-select
+                              value="{{dbRecord.data.pools[i].persistence.type}}"
+                              (selectionChange)="
+                                dbRecord.data.pools[
+                                  i
+                                ].persistence = this.persistence;
+                                dbRecord.data.pools[i].persistence.type =
+                                  $event.value
+                              "
+                            >
+                              <mat-option value="client-ip">
+                                Client IP
+                              </mat-option>
+                              <mat-option value="tls"> TLS </mat-option>
+                              <mat-option value="http-cookie">
+                                HTTP Cookie
+                              </mat-option>
+                              <mat-option value="app-cookie">
+                                APP Cookie
+                              </mat-option>
+                              <mat-option value="custom-http-header">
+                                Custom HTTP Header
+                              </mat-option>
+                            </mat-select>
+                          </mat-form-field>
+                        </div>
+                        <div class="flex-row"
+                        *ngIf="dbRecord.data.pools[i].persistence.type != 'client-ip'"
+                        >
+                          <mat-form-field
+                            *ngIf="dbRecord.data.pools[i].persistence.type != 'client-ip'"
+                          >
+                            <mat-label>Object Name</mat-label>
+                            <input
+                              matInput
+                              value="{{dbRecord.data.pools[i].persistence.obj_name}}"
+                              (blur)="dbRecord.data.pools[i].persistence.obj_name=$event.target.value"
+                            />
+                          </mat-form-field>
+                        </div>
+                        <div class="flex-row"
+                        *ngIf="dbRecord.data.pools[i].persistence.type != 'client-ip'"
+                        >
+                          <mat-form-field
+                            *ngIf="dbRecord.data.pools[i].persistence.type != 'client-ip'"
+                          >
+                            <mat-label>Timeout</mat-label>
+                            <input
+                              matInput
+                              type="number"
+                              min="0"
+                              max="86400"
+                              value="{{dbRecord.data.pools[i].persistence.timeout}}"
+                              (blur)="dbRecord.data.pools[i].persistence.timeout=this.pInt($event.target.value)"
+                            />
+                            <mat-hint align="end">0-86400</mat-hint>
+                          </mat-form-field>
+                        </div>
+                      </mat-card-content>
+                      <mat-card-actions>
+                        <div class="delete-row">
+                          <button
+                            type="button"
+                            mat-icon-button="warn"
+                            (click)="clearPersistence(i)"
+                          >
+                            <mat-icon>delete</mat-icon>
+                          </button>
+                        </div>
+                      </mat-card-actions>
+                    </mat-card>
+                  </ng-template>
+                </mat-tab>
+              </mat-tab-group>
+            </mat-expansion-panel>
+          </ng-template>
+          <button
+            type="button"
+            mat-raised-button
+            color="primary"
+            style="margin-top: 16px;"
+            (click)="addPool()"
+          >
+            Add Pool
+          </button>
+        </mat-expansion-panel>
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon inline="true" class="expansion-icon">code</mat-icon>
+              API
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <mat-card
+            style="
+              margin-top: 16px;
+              background-color: rgb(31, 38, 45);
+              color: #fff;
+              font-family: Roboto;
+            "
+          >
+            <mat-card-content>
+              <div>
+                <code>POST {{ this.apiUri }}/api/v1/virtualserver</code>
+              </div>
+              <pre>
+      {{ dbRecord | json }}
+    </pre
+              >
+            </mat-card-content>
+          </mat-card>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+    <div mat-dialog-actions>
+      <button type="button" mat-button mat-dialog-close>Cancel</button>
+      <span class="spacer"></span>
+      <button type="submit" mat-button cdkFocusInitial>
+        Commit
+      </button>
+    </div>
+  </form>
+</div>
+<div
+*ngIf="(this.lbDataSource.loading$ | async) || (this.vsDataSource.loading$ |async)"
+  style="position: relative;"
+  style="text-align: center;"
+>
+  <span style="color: #026cdf; display: block; margin-bottom: 10px;"
+    >Generating form...</span
+  >
+  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+</div>

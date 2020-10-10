@@ -1,0 +1,197 @@
+<div mat-dialog-title>
+    <mat-toolbar class="dialog-header mat-elevation-z2">
+        <div class="dialog-title" style="display: flex;width:100%">
+            <div style="flex-grow: auto;">{{this.source.data.name}}</div>
+            <div style="flex-grow: 1;"></div>
+            <div style="flex-grow: auto;">Migration Wizard</div>
+        </div>
+    </mat-toolbar>
+    <mat-progress-bar mode="indeterminate" *ngIf="this.migrateService.loading$ | async"></mat-progress-bar>
+</div>
+<div mat-dialog-content>
+    <form #f="ngForm" (ngSubmit)="onSubmit(f)">
+        <mat-form-field appearance="fill">
+            <mat-label>Product Code</mat-label>
+            <mat-select required [value]="
+          this.productCode != 1813 && this.productCode != 0
+            ? this.productCode
+            : null
+        " [(ngModel)]="productCode" name="product_code" (selectionChange)="this.productCode = $event.value; onSubmit(f)">
+                <mat-option *ngFor="let p of this.productCodes" [value]="p">{{ p }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+    </form>
+    <ng-container *ngIf="this.ready && this.response !== null && this.response.data !==undefined">
+        <div>
+            <mat-accordion displayMode="flat">
+                <mat-expansion-panel expanded="true">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title>
+                            <mat-icon class="ok" *ngIf="this.response.data.readiness_checks.ready">check_circle</mat-icon>
+                            <mat-icon class="error" *ngIf="!this.response.data.readiness_checks.ready">error</mat-icon>
+                            <div style="flex-grow: 1; align-self: center;">
+                                Staging Checks
+                            </div>
+                        </mat-panel-title>
+                    </mat-expansion-panel-header>
+                    <mat-card>
+                        <div class="validated">
+                            <mat-icon class="ok" *ngIf="this.response.data.readiness_checks.load_balancer">check_circle_outline</mat-icon>
+                            <mat-icon class="error" *ngIf="!this.response.data.readiness_checks.load_balancer">error_outline</mat-icon>
+                            <div class="check">Load Balancer</div>
+                            <div>
+                                {{ this.response.data.target_load_balancer }}
+                            </div>
+                            <div class="error-msg">{{ this.response.data.readiness_checks.error }}</div>
+                        </div>
+                        <div class="validated">
+                            <mat-icon class="ok" *ngIf="!this.response.data.source.data._nsr_backup_vip">check_circle_outline</mat-icon>
+                            <mat-icon class="warn" *ngIf="this.response.data.source.data._nsr_backup_vip">error_outline</mat-icon>
+                            <div class="check">
+                                No Backup VIP
+                            </div>
+                            <div>
+                                {{ this.response.data.source.data._nsr_backup_vip }}
+                            </div>
+                            <div class="warn-msg" *ngIf="this.response.data.source.data._nsr_backup_vip">
+                                Backup Vips will need to be manually created using GSLB
+                            </div>
+                        </div>
+                        <div class="validated">
+                            <mat-icon class="ok" *ngIf="this.response.data.readiness_checks.ip_status.ready">check_circle_outline</mat-icon>
+                            <mat-icon class="error" *ngIf="!this.response.data.readiness_checks.ip_status.ready">error_outline</mat-icon>
+                            <div class="check">
+                                IP Address
+                            </div>
+                            <div>
+                                {{ this.response.data.source.data.ip }}
+                            </div>
+                            <div class="error-msg">
+                                {{ this.response.data.readiness_checks.ip_status.error }}
+                            </div>
+                        </div>
+                        <div class="validated">
+                            <mat-icon class="ok" *ngIf="this.response.data.readiness_checks.dependency_status.ready">check_circle_outline</mat-icon>
+                            <mat-icon class="warn" *ngIf="!this.response.data.readiness_checks.dependency_status.ready">error_outline</mat-icon>
+                            <div class="check">
+                                Dependency Status
+                            </div>
+                            <div class="warn-msg">
+                                {{ this.response.data.readiness_checks.dependency_status.error }}
+                                <div *ngIf="!this.response.data.readiness_checks.dependency_status.ready">
+
+                                    <span style="margin-right:10px;text-transform: none;" *ngFor="let item of this.response.data.readiness_checks.dependency_status.ips">{{item}}</span>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="validated">
+                            <mat-icon class="ok" *ngIf="this.response.data.readiness_checks.network_status.ready">check_circle_outline</mat-icon>
+                            <mat-icon class="error" *ngIf="!this.response.data.readiness_checks.network_status.ready">error_outline</mat-icon>
+                            <div class="check">
+                                Network Ports
+                            </div>
+                            <div *ngFor="let item of this.response.data.source.data.ports">
+                                {{ item.port }}
+                            </div>
+                            <div style="text-transform: uppercase;">
+                                {{ this.response.data.source.data.service_type }}
+                            </div>
+                            <div class="error-msg">
+                                {{ this.response.data.readiness_checks.network_status.error }}
+                            </div>
+                        </div>
+                        <ng-template ngFor let-item [ngForOf]="this.response.data.readiness_checks.pool_status" let-i="index">
+                            <div class="validated">
+                                <mat-icon class="ok" *ngIf="this.response.data.readiness_checks.pool_status[i].ready">check_circle_outline</mat-icon>
+                                <mat-icon class="error" *ngIf="!this.response.data.readiness_checks.pool_status[i].ready">error_outline</mat-icon>
+                                <div class="check">Pool {{ i }}</div>
+                                <div class="error-msg">
+                                    {{ this.response.data.readiness_checks.pool_status[i].error }}
+                                </div>
+                            </div>
+                            <div class="validated-sub">
+                                <mat-icon class="ok" *ngIf="this.response.data.readiness_checks.pool_status[i].persistence">check_circle_outline</mat-icon>
+                                <mat-icon class="error" *ngIf="!this.response.data.readiness_checks.pool_status[i].persistence">error_outline</mat-icon>
+                                <div class="check">Persistence</div>
+                                <div class="error-msg">
+                                    {{ this.response.data.readiness_checks.pool_status[i].error }}
+                                </div>
+                            </div>
+                            <ng-template ngFor let-item [ngForOf]="this.response.data.readiness_checks.pool_status[i].health_monitors" let-ii="index">
+                                <div class="validated-sub">
+                                    <mat-icon class="ok" *ngIf="
+                      this.response.data.readiness_checks.pool_status[i].health_monitors[ii].ready
+                    ">check_circle_outline</mat-icon>
+                                    <mat-icon class="error" *ngIf="
+                      !this.response.data.readiness_checks.pool_status[i].health_monitors[ii].ready
+                    ">error_outline</mat-icon>
+                                    <div class="check">
+                                        Health Monitor
+                                    </div>
+                                    <div style="text-transform: capitalize;">
+                                        {{ this.response.data.readiness_checks.pool_status[i].health_monitors[ii].type }}
+                                    </div>
+                                    <div class="error-msg">
+                                        {{ this.response.data.readiness_checks.pool_status[i].health_monitors[ii].error }}
+                                    </div>
+                                </div>
+                            </ng-template>
+                            <ng-template ngFor let-item [ngForOf]="this.response.data.readiness_checks.pool_status[i].servers" let-ii="index">
+                                <div class="validated-sub">
+                                    <mat-icon class="ok" *ngIf="this.response.data.readiness_checks.pool_status[i].servers[ii].ready">check_circle_outline</mat-icon>
+                                    <mat-icon class="error" *ngIf="!this.response.data.readiness_checks.pool_status[i].servers[ii].ready">error_outline</mat-icon>
+                                    <div class="check">
+                                        Server
+                                    </div>
+                                    <div>
+                                        {{ this.response.data.readiness_checks.pool_status[i].servers[ii].ip }}
+                                    </div>
+                                    <div class="error-msg">
+                                        {{ this.response.data.readiness_checks.pool_status[i].servers[ii].error }}
+                                    </div>
+                                </div>
+                            </ng-template>
+                        </ng-template>
+                    </mat-card>
+                </mat-expansion-panel>
+                <mat-expansion-panel>
+                    <mat-expansion-panel-header>
+                        <mat-panel-title>
+                            <mat-icon style="color: #1879b9;">fact_check</mat-icon>
+                            Source
+                        </mat-panel-title>
+                    </mat-expansion-panel-header>
+                    <mat-card class="code">
+                        <pre><code>
+        {{ this.response.data.source | json }}
+      </code></pre>
+                    </mat-card>
+                </mat-expansion-panel>
+                <mat-expansion-panel [disabled]="!this.response.data.destination">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title>
+                            <mat-icon style="color: #ff4b00;">fact_check</mat-icon>
+                            Destination
+                        </mat-panel-title>
+                    </mat-expansion-panel-header>
+                    <mat-card class="code">
+                        <pre><code>
+        {{ this.response.data.destination | json }}
+      </code></pre>
+                    </mat-card>
+                </mat-expansion-panel>
+            </mat-accordion>
+        </div>
+    </ng-container>
+</div>
+
+<div mat-dialog-actions>
+    <button mat-button type="button" mat-dialog-close>Close</button>
+    <span class="spacer"></span>
+    <button mat-button type="button" (click)="migrate(source.id)" [disabled]="this.response === null || !this.response.data.readiness_checks || this.source._source_status === 'migrated'">
+    Commit
+  </button>
+</div>

@@ -1,0 +1,18 @@
+<div
+  *ngIf="
+    storage.getItem('jwt') !== undefined && storage.getItem('jwt') !== null && this.router.url !=='/'"
+>
+  <app-toolbar></app-toolbar>
+  <router-outlet></router-outlet>
+</div>
+<div
+  *ngIf="
+  this.router.url ==='/' || (storage.getItem('jwt') === undefined || storage.getItem('jwt') === null)">
+  <app-login></app-login>
+</div>
+<div class="statusBar" *ngIf="this.queueService.queueing$ | async">
+  <span><mat-spinner diameter="24"></mat-spinner></span>
+  <span>
+    {{ this.queueService.data$ | async }}
+  </span>
+</div>

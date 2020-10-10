@@ -1,0 +1,218 @@
+<div matDialogTitle>Recycle Bin</div>
+
+<div matDialogContent>
+  <form
+  (keydown.enter)="$event.preventDefault()"
+  style="display: flex; width: 100%;"
+>
+  <div style="flex-grow: auto; align-self: center; margin-right: 10px;"></div>
+  <mat-form-field style="flex-grow: 1;">
+    <mat-chip-list aria-label="Filter" #searchList>
+      <mat-icon matPrefex>search</mat-icon>
+      <mat-chip
+        *ngFor="let s of search"
+        [selectable]="selectable"
+        [removable]="removable"
+        (removed)="removeSearchOption(s)"
+      >
+        {{ s }}
+
+        <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+      </mat-chip>
+      <input
+        style="height: 32px;"
+        id="search-box"
+        [matChipInputFor]="searchList"
+        [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+        [matChipInputAddOnBlur]="addOnBlur"
+        (matChipInputTokenEnd)="addSearchOption($event)"
+      />
+      <button
+        mat-icon-button
+        matSuffix
+        (click)="clear()"
+        matTooltip="Clear"
+        matTooltipPosition="left"
+      >
+        <mat-icon matSuffix>clear</mat-icon>
+      </button>
+    </mat-chip-list>
+  </mat-form-field>
+</form>
+    <div style="position: relative;">
+        <div class="spinner-container" *ngIf="dataSource.loading$ | async">
+          <mat-spinner> </mat-spinner>
+        </div>
+        <mat-table
+          [dataSource]="dataSource"
+          matSort
+          matSortActive="product_code"
+          matSortDirection="asc"
+          matSortDisableClear
+          id="ExampleMaterialTable"
+        >
+          <ng-container matColumnDef="load_balancer_ip">
+            <mat-header-cell *matHeaderCellDef mat-sort-header
+              >Load Balancer</mat-header-cell
+            >
+            <mat-cell *matCellDef="let row">
+              <span
+                class="label"
+                matTooltipPosition="left"
+              >
+              {{ row.load_balancer_ip }}</span
+              >
+            </mat-cell>
+          </ng-container>
+          >
+          <ng-container matColumnDef="platform">
+            <mat-header-cell *matHeaderCellDef mat-sort-header
+              >Platform</mat-header-cell
+            >
+            <mat-cell *matCellDef="let row">
+              <span
+                class="label"
+                [matTooltip]="row._load_balancer.mfr"
+                matTooltipPosition="left"
+                style="text-transform: capitalize; font-weight: 500;"
+                [ngClass]="{
+                  'avi-label': row._load_balancer.mfr != 'netscaler',
+                  'netscaler-label': row._load_balancer.mfr == 'netscaler'
+                }"
+              >
+                {{ row._load_balancer.mfr.substring(0, 1) }}</span
+              >
+            </mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="product_code">
+            <mat-header-cell *matHeaderCellDef mat-sort-header
+              >Product Code</mat-header-cell
+            >
+            <mat-cell *matCellDef="let row">{{ row.data.product_code }}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="ip">
+            <mat-header-cell *matHeaderCellDef mat-sort-header>IP</mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              <span
+                style="cursor: default;"
+                matTooltip="{{ row.data.dns }}"
+                matTooltipPosition="left"
+                >{{ row.data.ip }}</span
+              >
+            </mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="port">
+            <mat-header-cell *matHeaderCellDef>Port</mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              <ng-template ngFor let-item [ngForOf]="row.data.ports" let-i="index">
+                <span
+                  class="port-label"
+                  [style.backgroundColor]="
+                    row.data.ports[i].l4_profile != undefined &&
+                    row.data.ports[i].l4_profile.includes('tcp')
+                      ? '#148016'
+                      : '#026CDF'
+                  "
+                  matTooltipPosition="left"
+                  [matTooltip]="
+                    row.data.ports[i].l4_profile != undefined &&
+                    row.data.ports[i].l4_profile.includes('tcp')
+                      ? 'TCP'
+                      : 'UDP'
+                  "
+                  >{{ row.data.ports[i].port }}</span
+                >
+              </ng-template>
+            </mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="service_type">
+            <mat-header-cell *matHeaderCellDef mat-sort-header
+              >Service</mat-header-cell
+            >
+            <mat-cell *matCellDef="let row">
+              {{ row.data.service_type }}
+            </mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="dns">
+            <mat-header-cell *matHeaderCellDef>
+              DNS
+            </mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              <div>{{ row.data.dns }}</div>
+            </mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="name">
+            <mat-header-cell
+              style="flex-grow: 2; white-space: initial;"
+              *matHeaderCellDef
+              mat-sort-header
+              >Name
+            </mat-header-cell>
+            <mat-cell
+              style="flex-grow: 2; white-space: initial;"
+              *matCellDef="let row"
+              matTooltip="{{ row.data.name }}"
+              matTooltipPosition="left"
+            >
+              {{ row.data.name }}
+            </mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="enabled">
+            <mat-header-cell *matHeaderCellDef mat-sort-header
+              >Enabled</mat-header-cell
+            >
+            <mat-cell *matCellDef="let row">
+              <div>
+                <mat-icon
+                  matTooltip="Enabled"
+                  matTooltipPosition="before"
+                  *ngIf="row.data.enabled"
+                  style="color: #148016; cursor: default;"
+                >
+                  play_circle_outline</mat-icon
+                >
+                <mat-icon
+                  matTooltip="Disabled"
+                  matTooltipPosition="before"
+                  *ngIf="!row.data.enabled"
+                  style="color: #8f9296; cursor: default;"
+                  >pause_circle_outline
+                </mat-icon>
+                <span></span>
+              </div>
+            </mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="edit">
+            <mat-header-cell *matHeaderCellDef></mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              <span class="spacer"></span>
+              <button
+                [disabled]="!this.token.testMembership(row.data.product_code)"
+                mat-icon-button
+                matTooltip="Restore Record"
+                matTooltipPosition="left"
+                [attr.aria-label]="'Restore'"
+                class="restore-icon"
+                (click)="restore(row)"
+              >
+                <mat-icon>restore_from_trash</mat-icon>
+              </button>
+            </mat-cell>
+          </ng-container>
+          <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+        </mat-table>
+        <mat-paginator
+          [length]="dataSource.sql"
+          [pageSize]="10"
+          [pageSizeOptions]="[3, 5, 10, 25, 50, 100]"
+        >
+        </mat-paginator>
+      </div>
+    
+</div>
+
+<div mat-dialog-actions>
+  <span class="spacer"></span>
+  <button mat-button type="button" mat-dialog-close>Close</button>
+</div>

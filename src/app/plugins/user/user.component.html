@@ -1,0 +1,22 @@
+<div mat-dialog-title>
+  <div>
+    {{ this.token.token.name }} ({{ this.token.token.username }})
+  </div>
+</div>
+<div mat-dialog-content style="min-height: 200px;">
+  <div><span style="font-weight: 600; color: #026cdf; margin-bottom: 10px;">Token Expires:</span> {{ expiry }}</div>
+  <div style="font-weight: 600; color: #026cdf; margin-bottom: 10px;">
+    Product Code Memberships
+  </div>
+  <mat-chip-list #chipList aria-label="membership">
+    <mat-chip *ngFor="let prd of this.productCodes">
+      {{ prd }}
+    </mat-chip>
+  </mat-chip-list>
+</div>
+<div mat-dialog-actions style="display: flex;">
+  <span style="flex-grow: 1;"></span>
+  <button mat-button (click)="this.closeDialog()">
+    Close
+  </button>
+</div>

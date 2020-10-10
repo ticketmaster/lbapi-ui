@@ -1,0 +1,11 @@
+<svg version="1.1"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:a="http://ns.adobe.com/AdobeSVGViewerExtensions/3.0/"
+	 x="0px" y="0px" width="512px" height="512px" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve">
+<defs>
+</defs>
+<polygon points="190.649,308.512 190.65,389.396 50.56,249.306 190.649,109.217 190.649,190.102 256,190.102 256,0 0,0 0,512 
+	256,512 256,308.512 "/>
+<polygon points="256.083,308.511 321.518,308.511 321.518,389.396 461.607,249.307 321.518,109.217 321.518,190.101 
+	256.083,190.101 "/>
+<path d="M512,512H0V0h512V512L512,512z M37.96,474.073h436.079V37.926H37.96V474.073L37.96,474.073z"/>
+</svg>
