@@ -80,6 +80,7 @@ export class CreateVsDialogComponent implements OnInit, OnDestroy {
   };
   public persistence: Persistence = {};
   public pool: Pool = {
+    weight:1,
     bindings: [this.binding],
     enabled: true,
     health_monitors: [this.monitor],

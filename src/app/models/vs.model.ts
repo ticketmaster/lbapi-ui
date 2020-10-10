@@ -68,6 +68,8 @@ export interface Pool {
     certificate?: Certificate;
     default_port?: number;
     enabled: boolean;
+    priority?: number;
+    weight?: number;
     graceful_disable?: boolean;
     health_monitors?: HealthMonitor[];
     is_nsr_service?: boolean;

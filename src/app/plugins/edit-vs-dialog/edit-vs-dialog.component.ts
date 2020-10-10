@@ -56,6 +56,7 @@ export class EditVsDialogComponent implements OnInit {
   pool: Pool = {
     bindings: [this.binding],
     enabled: false,
+    weight: 1,
     health_monitors: [this.monitor],
     name: '(New)',
     persistence: this.persistence,

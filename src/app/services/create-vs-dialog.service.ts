@@ -24,6 +24,7 @@ export class CreateVsDialogService {
               },
             },
           ],
+          weight:1,
           certificate: {},
           enabled: true,
           health_monitors: [],
