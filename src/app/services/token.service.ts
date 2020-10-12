@@ -3,20 +3,17 @@ import * as jwt_decode from 'jwt-decode';
 import { User } from '../models/user.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
-
 @Injectable({
   providedIn: 'root',
 })
 export class TokenService {
-  constructor(
-    private snackBar: MatSnackBar
-  ) {}
+  constructor(private snackBar: MatSnackBar) {}
   public token: User;
   public productCodes: Map<number, number>;
-
-
+  public admin: boolean;
 
   public clear() {
+    this.admin = false;
     sessionStorage.removeItem('jwt');
   }
 
@@ -29,20 +26,21 @@ export class TokenService {
 
     const DATE = new Date();
     const TIMESTAMP = DATE.getTime();
-    let timeout = (this.token.exp*1000)-TIMESTAMP
+    let timeout = this.token.exp * 1000 - TIMESTAMP;
 
     if (timeout < 0) {
-      this.snackBar.open(
-        'Token has expired',
-        'Close',
-        {
-          duration: 10000,
-        }
-      );
+      this.snackBar.open('Token has expired', 'Close', {
+        duration: 10000,
+      });
       this.clear();
     }
 
     this.token.roles.forEach((r) => {
+      const adminMatch = r.match(/PRD1544-OperatorAccess/);
+      if (adminMatch !== null) {
+        this.admin = true;
+      }
+
       const result = r.match(/PRD[0-9]*/);
       if (result !== null) {
         const code = result[0].replace('PRD', '');
@@ -58,7 +56,7 @@ export class TokenService {
       this.productCodes.set(p, p);
     }
   }
-  
+
   public testMembership(code: number): boolean {
     if (this.productCodes.get(code) === code) {
       return true;

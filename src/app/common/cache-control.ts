@@ -7,8 +7,8 @@ intercept(req: HttpRequest<any>, next: HttpHandler) {
       // Prevent caching in IE, in particular IE11.
       // See: https://support.microsoft.com/en-us/help/234067/how-to-prevent-caching-in-internet-explorer
       setHeaders: {
-        'Cache-Control': 'must-revalidate',
-        Pragma: 'must-revalidate'
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache'
       }
     });
     return next.handle(authReq);

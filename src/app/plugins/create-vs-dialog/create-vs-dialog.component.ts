@@ -51,7 +51,6 @@ export class CreateVsDialogComponent implements OnInit, OnDestroy {
   public sharedIPControl = new FormControl();
   public filteredVs: Observable<VsDbRecord[]>;
   public mapVs = new Map<string, string>();
-  public adminAccess: boolean;
   public vsDataSource: VsServiceDs;
   public lbDataSource: LbServiceDs;
   public apiUri = GlobalConstants.apiURL;
@@ -168,9 +167,9 @@ export class CreateVsDialogComponent implements OnInit, OnDestroy {
       input.value = '';
     }
   }
-  isAdmin() {
-    if (this._tokenService.productCodes.get(1544) === 1544) {
-      this.adminAccess = true;
+  isAdmin():boolean {
+    if (this._tokenService.admin) {
+      return true;
     }
   }
   addResponseCode(event: MatChipInputEvent, p: number, h: number): void {
@@ -289,7 +288,6 @@ export class CreateVsDialogComponent implements OnInit, OnDestroy {
     if (this.dbRecord.platform === 'netscaler') {
       this.isNetscaler = true;
     }
-    this.isAdmin();
   }
 
   ngOnDestroy() {

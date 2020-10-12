@@ -133,6 +133,11 @@ export class VsTableComponent implements OnInit, AfterViewInit {
   migrate(dbRecord: DbRecord) {
     this.migrateDialog.openDialog(dbRecord);
   }
+  isAdmin():boolean {
+    if (this.token.admin) {
+      return true;
+    }
+  }
   convertToCSV(dbRecord: DbRecord[], headerList) {
     const objArray: ExportVS[] = [];
     dbRecord.forEach((r) => {
