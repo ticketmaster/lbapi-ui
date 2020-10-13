@@ -274,6 +274,15 @@ dbRecord.data.pools[i].priority = this.pInt(
                                                 <mat-hint align="end">1-10. For Active/Standby 10=Active, 1=Standby</mat-hint>
                                             </mat-form-field>
                                             <mat-form-field>
+                                              <mat-label>Weight</mat-label>
+                                              <input type="number" min="0" max="10" [disabled]="isNetscaler" [(ngModel)]="dbRecord.data.pools[i].weight" name="{{ i }}-weight" matInput (blur)="
+dbRecord.data.pools[i].weight = this.pInt(
+$event.target.value
+)
+" value="{{ dbRecord.data.pools[i].weight }}" />
+                                              <mat-hint align="end">0-10. 0=block traffic, 1-10=allow traffic. Higher weight receives more traffic.</mat-hint>
+                                          </mat-form-field>
+                                            <mat-form-field>
                                                 <mat-label>Default Port</mat-label>
                                                 <input type="number" min="0" max="65535" matInput [disabled]="(dbRecord.data.pools[i]._uuid != undefined && isNetscaler)||!defaultPortRequired(i)" [required]="defaultPortRequired(i)" [value]="!defaultPortRequired(i)?null:0" [(ngModel)]="
                           dbRecord.data.pools[i].default_port" name="{{i}}-default_port" (blur)="dbRecord.data.pools[i].default_port = this.pInt($event.target.value)" value="{{dbRecord.data.pools[i].default_port}}" />
