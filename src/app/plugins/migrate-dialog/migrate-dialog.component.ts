@@ -61,6 +61,14 @@ export class MigrateDialogComponent implements OnInit {
       this.ready = true;
     }
   }
+  pInt(v: string): number {
+    return Number(v);
+  }
+  isAdmin(): boolean {
+    if (this.token.admin) {
+      return true;
+    }
+  }
   private load(): void {
     //////////////////////////////////////////////////////////////////////////
     this.migrateService.loading$.next(true);

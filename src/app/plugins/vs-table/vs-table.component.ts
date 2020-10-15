@@ -16,7 +16,8 @@ import { DeleteVsDialogService } from 'src/app/services/delete-vs-dialog.service
 import { FilterSheetService } from 'src/app/services/filter-sheet.service';
 import { MigrateDialogService } from 'src/app/services/migrate-dialog.service';
 import { RecycleDialogService } from 'src/app/services/recycle-dialog.service';
-import { MigrateService } from 'src/app/services/migrate.service';
+import { StatusService, StatusServiceDs } from 'src/app/services/status.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 @Component({
   selector: 'app-vs-table',
   templateUrl: './vs-table.component.html',
@@ -33,6 +34,9 @@ export class VsTableComponent implements OnInit, AfterViewInit {
     private user: UserService,
     public token: TokenService,
     public vsService: VsService,
+    public statusService: StatusService,
+    private snackBar: MatSnackBar,
+
   ) {}
   readonly separatorKeysCodes: number[] = [TAB, COMMA, ENTER];
   filter: Filter[] = [
@@ -72,6 +76,7 @@ export class VsTableComponent implements OnInit, AfterViewInit {
   addOnBlur = false;
   selectable = true;
   dataSource: VsServiceDs;
+  statusSource: StatusServiceDs;
   displayedColumns = [
     'product_code',
     'platform',
@@ -98,11 +103,16 @@ export class VsTableComponent implements OnInit, AfterViewInit {
     this.token.get();
     this.dataSource = new VsServiceDs(this.vsService);
     this.dataSource.get({offset:0,limit:10});
+    this.statusSource = new StatusServiceDs(this.statusService, this.snackBar);
+
   }
   ngAfterViewInit() {
-    merge(this.sort.sortChange, this.paginator.page, this.vsService.recordResponse$)
+    merge(this.sort.sortChange, this.paginator.page, this.vsService.recordResponse$, this.statusService.recordResponse$)
       .pipe(tap(() => this.loadRecords()))
       .subscribe();
+  }
+  clearStatus(rec:DbRecord) {
+    this.statusSource.delete(rec)
   }
   loadRecords() {
     let filter = '';

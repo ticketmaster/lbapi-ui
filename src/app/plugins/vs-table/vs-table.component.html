@@ -406,6 +406,19 @@
               <mat-icon>delete</mat-icon>
             </button>
           </span>
+          <span *ngIf="this.isAdmin()">
+            <button
+              [disabled]="row._source_status=='deployed'"
+              mat-icon-button
+              matTooltip="Clear Status"
+              matTooltipPosition="left"
+              [attr.aria-label]="'Clear Status'"
+              class="del-icon"
+              (click)="clearStatus(row)"
+            >
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </span>
         </mat-cell>
       </ng-container>
       <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>

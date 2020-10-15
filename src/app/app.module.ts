@@ -36,6 +36,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 /* ************************************************************************** */
 import { CreateVsDialogComponent } from './plugins/create-vs-dialog/create-vs-dialog.component';
 import { VsService } from './services/vs.service';
+import { StatusService } from './services/status.service';
 import { LbService } from './services/lb.service';
 import { DeleteLbDialogComponent } from './plugins/delete-lb-dialog/delete-lb-dialog-component';
 import { DeleteVsDialogComponent } from './plugins/delete-vs-dialog/delete-vs-dialog-component';
@@ -121,6 +122,7 @@ import { RecycleDialogComponent } from './plugins/recycle-dialog/recycle-dialog.
     RecycleService,
     RecycleDialogService,
     LbService,
+    StatusService,
     {
       provide: HTTP_INTERCEPTORS,
       useClass: NoCacheHeadersInterceptor,
