@@ -76,7 +76,7 @@
           </mat-select>
           <input *ngIf="this.isAdmin()"
             matInput
-            (blur)="dbRecord.data.product_code = $event.target.value;setName(data_name.value)"
+            (blur)="dbRecord.data.product_code = this.pInt($event.target.value);setName(data_name.value)"
             [(ngModel)]="dbRecord.data.product_code"
             name="product_code"
           />
